@@ -38,8 +38,8 @@ social:
   email: mbusbee505@gmail.com # change to your email address
   links:
     # The first element serves as the copyright owner's link
-    - https://twitter.com/michaelbusbee_ # change to your Twitter homepage
-    - https://github.com/michael-busbee # change to your GitHub homepage
+    - https://twitter.com/mbusbee505 # change to your Twitter homepage
+    - https://github.com/mbusbee505 # change to your GitHub homepage
     # Uncomment below to add more social links
     # - https://www.facebook.com/username
     - https://www.linkedin.com/in/michael-busbee
@@ -99,8 +99,7 @@ cdn:
 
 # the avatar on sidebar, support local or CORS resources
 
-avatar: https://media.licdn.com/dms/image/v2/D4E03AQEa4MpviWhwrw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1665188714695?e=1742428800&v=beta&t=I7WMZpkggTzPLn9ebctUvu099CWAbS4R0snapHtaVrA
-
+avatar: https://avatars.githubusercontent.com/u/188224034?v=4
 
 
 # The URL of the site-wide social preview image used in SEO `og:image` meta tag.
