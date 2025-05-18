@@ -72,7 +72,7 @@ https://github.com/SwiftOnSecurity/sysmon-config/archive/refs/heads/master.zip
 
 Extract the folders in the Download folder and move `sysmonconfig-export.xml` to the sysmon folder. Open Admin PowerShell and run the following command from the Sysmon folder:
 
-```PowerShell
+```bash
 ./sysmon.exe -accepteula -i sysmonconfig-export.xml
 ```
 
@@ -96,7 +96,7 @@ Local Group Policy Editor > Computer Configuration > Administrative Templates > 
 
 Open an Admin PowerShell window and run the following commands:
 
-```PowerShell
+```bash
 Install-Module -Name invoke-atomicredteam,powershell-yaml -Scope CurrentUser
 IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing);
 Install-AtomicRedTeam -getAtomics
@@ -220,7 +220,7 @@ sudo pwsh
 
 Now I can install Atomic Red Team using the same commands as before for Windows:
 
-```PowerShell
+```bash
 Install-Module -Name invoke-atomicredteam,powershell-yaml -Scope CurrentUser
 IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing);
 Install-AtomicRedTeam -getAtomics
@@ -252,7 +252,7 @@ sudo pwsh
 
 Now I can install Atomic Red Team using the same commands as before for Windows:
 
-```PowerShell
+```bash
 Install-Module -Name invoke-atomicredteam,powershell-yaml -Scope CurrentUser
 IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing);
 Install-AtomicRedTeam -getAtomics
@@ -265,7 +265,7 @@ Elastic Cloud allows you to have a 2 week free trial of their services. In case 
 Alternatively you can run these commands to remove the elastic agent from a host:
 
 Windows:
-```PowerShell
+```bash
 C:\"Program Files"\Elastic\Agent\elastic-agent.exe uninstall
 ```
 
@@ -289,7 +289,7 @@ Once this was done I needed to add agent integrations for my VMs. I went to the 
 
 Installing the Agent will give you an install command such as the one below:
 
-```PowerShell
+```bash
 
 $ProgressPreference = 'SilentlyContinue' Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.1-windows-x86_64.zip -OutFile elastic-agent-9.0.1-windows-x86_64.zip Expand-Archive .\elastic-agent-9.0.1-windows-x86_64.zip -DestinationPath . cd elastic-agent-9.0.1-windows-x86_64 .\elastic-agent.exe install --url=https://f1f854e744b24084888cdb940e60c8bf.fleet.us-east-1.aws.elastic.cloud:443 --enrollment-token=QVNPMDJwWUJ2c3hxRXhDcFM1VDQ6MlA0b1Y0QkNiVDFBWmUxVW1RWGs0UQ==
 
