@@ -8,6 +8,7 @@ tags:  [Homelab, Detecion, Elastic, Virtual Machines]
 
 
 # Introduction
+
 ![](/assets/img/posts/2025-05-17-Building-A-Detection-Lab/Lab-Environment.png)
 
 ## Why
