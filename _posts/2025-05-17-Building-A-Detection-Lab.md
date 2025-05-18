@@ -290,7 +290,9 @@ Once this was done I needed to add agent integrations for my VMs. I went to the 
 Installing the Agent will give you an install command such as the one below:
 
 ```PowerShell
+
 $ProgressPreference = 'SilentlyContinue' Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.1-windows-x86_64.zip -OutFile elastic-agent-9.0.1-windows-x86_64.zip Expand-Archive .\elastic-agent-9.0.1-windows-x86_64.zip -DestinationPath . cd elastic-agent-9.0.1-windows-x86_64 .\elastic-agent.exe install --url=https://f1f854e744b24084888cdb940e60c8bf.fleet.us-east-1.aws.elastic.cloud:443 --enrollment-token=QVNPMDJwWUJ2c3hxRXhDcFM1VDQ6MlA0b1Y0QkNiVDFBWmUxVW1RWGs0UQ==
+
 ```
 
 Wait for the Agent Enrollment confirmation on the Elastic console to prove the agent was installed correctly on the Windows Workstation.
