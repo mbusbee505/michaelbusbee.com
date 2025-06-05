@@ -187,8 +187,6 @@ Elastic's agent needs Zeek to push logs in JSON format. To do this I made this c
 echo "@load ../json-logs.zeek" >> /opt/zeek/share/zeek/policy/tuning/defaults/__load__.zeek
 ```
 
-
-
 ```bash
 echo "@load policy/tuning/json-logs.zeek" >> /opt/zeek/share/zeek/site/local.zeek
 ```
