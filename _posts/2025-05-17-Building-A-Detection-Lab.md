@@ -156,7 +156,7 @@ ip addr | grep "inet "
 
 Output: 
 
-```plain text
+```bash
 inet 127.0.0.1/8 scope host lo
 inet 172.16.44.132/24 brd 172.16.44.255 scope global dynamic noprefixroute ens160
 inet 172.16.1.129/24 brd 172.16.1.255 scope global dynamic noprefixroute ens256
