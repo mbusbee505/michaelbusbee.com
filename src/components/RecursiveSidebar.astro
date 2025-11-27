@@ -15,8 +15,8 @@ async function buildFileTree(dirPath: string, basePath: string = ''): Promise<Fi
     const items: FileTreeItem[] = [];
 
     for (const entry of entries) {
-      // Skip hidden files, Attachments folders, and .md files in the tree
-      if (entry.startsWith('.') || entry === 'Attachments' || entry.endsWith('.md')) {
+      // Skip hidden files, Attachments folders (case-insensitive), and .md files in the tree
+      if (entry.startsWith('.') || entry.toLowerCase() === 'attachments' || entry.endsWith('.md')) {
         continue;
       }
 
