@@ -2,6 +2,8 @@
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
+const base = import.meta.env.BASE_URL;
+
 interface FileTreeItem {
   name: string;
   path: string;
@@ -45,7 +47,7 @@ async function buildFileTree(dirPath: string, basePath: string = ''): Promise<Fi
         
         if (markdownFile) {
           // Folder has a matching markdown file - make the folder clickable
-          const urlPath = '/' + relativePath + '/' + markdownFile.replace(/\.md$/, '');
+          const urlPath = base + relativePath + '/' + markdownFile.replace(/\.md$/, '');
           items.push({
             name: entry,
             path: urlPath,
