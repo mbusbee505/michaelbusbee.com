@@ -15,8 +15,8 @@ async function buildFileTree(dirPath: string, basePath: string = ''): Promise<Fi
     const items: FileTreeItem[] = [];
 
     for (const entry of entries) {
-      // Skip hidden files and Attachments folders in the tree
-      if (entry.startsWith('.') || entry === 'Attachments') {
+      // Skip hidden files, Attachments folders, and .md files in the tree
+      if (entry.startsWith('.') || entry === 'Attachments' || entry.endsWith('.md')) {
         continue;
       }
 
@@ -25,21 +25,41 @@ async function buildFileTree(dirPath: string, basePath: string = ''): Promise<Fi
       const relativePath = basePath ? `${basePath}/${entry}` : entry;
 
       if (stats.isDirectory()) {
+        // Check if this folder contains a markdown file with a similar name
+        const folderEntries = await readdir(fullPath);
+        let markdownFile: string | null = null;
+        
+        // Look for any .md file in this directory (prefer one with matching name)
+        for (const file of folderEntries) {
+          if (file.endsWith('.md')) {
+            markdownFile = file;
+            // Prefer markdown file with matching folder name
+            if (file.toLowerCase().replace(/\.md$/, '') === entry.toLowerCase().replace(/-/g, '')) {
+              break;
+            }
+          }
+        }
+
         const children = await buildFileTree(fullPath, relativePath);
-        items.push({
-          name: entry,
-          path: relativePath,
-          isDirectory: true,
-          children: children.length > 0 ? children : undefined,
-        });
-      } else if (entry.endsWith('.md')) {
-        // Create URL-friendly path: Lets-Defend/Easy/Challenge1/Challenge-1.md -> /Lets-Defend/Easy/Challenge1/Challenge-1
-        const urlPath = '/' + relativePath.replace(/\.md$/, '');
-        items.push({
-          name: entry.replace(/\.md$/, ''),
-          path: urlPath,
-          isDirectory: false,
-        });
+        
+        if (markdownFile) {
+          // Folder has a markdown file - make the folder clickable
+          const urlPath = '/' + relativePath + '/' + markdownFile.replace(/\.md$/, '');
+          items.push({
+            name: entry,
+            path: urlPath,
+            isDirectory: true,
+            children: children.length > 0 ? children : undefined,
+          });
+        } else {
+          // Folder without markdown - just show as expandable folder
+          items.push({
+            name: entry,
+            path: relativePath,
+            isDirectory: true,
+            children: children.length > 0 ? children : undefined,
+          });
+        }
       }
     }
 
@@ -91,56 +111,86 @@ const currentPath = Astro.url.pathname;
         <div class="tree-item" data-path={item.path}>
           {item.isDirectory ? (
             <div>
-              <button 
-                class="folder-toggle w-full text-left px-3 py-2 rounded font-mono text-sm hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-200 flex items-center gap-2"
-                data-folder={item.path}
-              >
-                <span class="chevron text-neon-pink transition-transform duration-200">▶</span>
-                <span class="text-electric-purple">📁</span>
-                <span>{item.name}</span>
-              </button>
-              {item.children && (
-                <div class="folder-content ml-4 mt-1 space-y-1 hidden">
-                  {item.children.map((child) => (
-                    child.isDirectory ? (
-                      <div class="tree-item" data-path={child.path}>
-                        <button 
-                          class="folder-toggle w-full text-left px-3 py-2 rounded font-mono text-sm hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-200 flex items-center gap-2"
-                          data-folder={child.path}
-                        >
-                          <span class="chevron text-neon-pink transition-transform duration-200">▶</span>
-                          <span class="text-electric-purple">📁</span>
-                          <span>{child.name}</span>
-                        </button>
-                        {child.children && (
-                          <div class="folder-content ml-4 mt-1 space-y-1 hidden">
-                            {child.children.map((file) => (
-                              <a
-                                href={file.path}
-                                class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
-                                  currentPath === file.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
-                                }`}
+              {item.path.startsWith('/') ? (
+                /* Folder with markdown file - render as link */
+                <a
+                  href={item.path}
+                  class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
+                    currentPath === item.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
+                  }`}
+                >
+                  <span class="text-electric-purple">📁</span>
+                  <span>{item.name}</span>
+                </a>
+              ) : (
+                /* Folder without markdown - render as toggle button */
+                <>
+                  <button 
+                    class="folder-toggle w-full text-left px-3 py-2 rounded font-mono text-sm hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-200 flex items-center gap-2"
+                    data-folder={item.path}
+                  >
+                    <span class="chevron text-neon-pink transition-transform duration-200">▶</span>
+                    <span class="text-electric-purple">📁</span>
+                    <span>{item.name}</span>
+                  </button>
+                  {item.children && (
+                    <div class="folder-content ml-4 mt-1 space-y-1 hidden">
+                      {item.children.map((child) => (
+                        child.isDirectory ? (
+                          child.path.startsWith('/') ? (
+                            /* Child folder with markdown */
+                            <a
+                              href={child.path}
+                              class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
+                                currentPath === child.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
+                              }`}
+                            >
+                              <span class="text-electric-purple">📁</span>
+                              <span>{child.name}</span>
+                            </a>
+                          ) : (
+                            /* Child folder without markdown */
+                            <div class="tree-item" data-path={child.path}>
+                              <button 
+                                class="folder-toggle w-full text-left px-3 py-2 rounded font-mono text-sm hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-200 flex items-center gap-2"
+                                data-folder={child.path}
                               >
-                                <span class="text-neon-green">📄</span>
-                                <span>{file.name}</span>
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <a
-                        href={child.path}
-                        class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
-                          currentPath === child.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
-                        }`}
-                      >
-                        <span class="text-neon-green">📄</span>
-                        <span>{child.name}</span>
-                      </a>
-                    )
-                  ))}
-                </div>
+                                <span class="chevron text-neon-pink transition-transform duration-200">▶</span>
+                                <span class="text-electric-purple">📁</span>
+                                <span>{child.name}</span>
+                              </button>
+                              {child.children && (
+                                <div class="folder-content ml-4 mt-1 space-y-1 hidden">
+                                  {child.children.map((file) => (
+                                    <a
+                                      href={file.path}
+                                      class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
+                                        currentPath === file.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
+                                      }`}
+                                    >
+                                      <span class="text-neon-green">📄</span>
+                                      <span>{file.name}</span>
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        ) : (
+                          <a
+                            href={child.path}
+                            class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
+                              currentPath === child.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
+                            }`}
+                          >
+                            <span class="text-neon-green">📄</span>
+                            <span>{child.name}</span>
+                          </a>
+                        )
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ) : (
