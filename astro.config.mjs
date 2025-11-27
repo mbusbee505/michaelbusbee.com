@@ -3,7 +3,8 @@ import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://michaelbusbee.com',
+  site: 'https://mbusbee505.github.io',
+  base: '/michaelbusbee.com',
   integrations: [tailwind()],
   markdown: {
     shikiConfig: {
