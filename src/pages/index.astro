@@ -1,0 +1,116 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout title="Home">
+  <div class="max-w-5xl mx-auto">
+    <!-- Hero Section -->
+    <div class="mb-16">
+      <h1 class="text-6xl md:text-8xl font-mono font-bold text-neon-cyan mb-4 glitch text-glow-strong" data-text="MICHAELBUSBEE.COM">
+        MICHAELBUSBEE.COM
+      </h1>
+      <div class="h-1 w-32 bg-gradient-to-r from-neon-pink via-electric-purple to-neon-cyan mb-8"></div>
+      <p class="text-xl md:text-2xl text-gray-300 font-mono">
+        <span class="text-neon-pink">{'>'}</span> Cybersecurity Professional
+      </p>
+      <p class="text-lg text-gray-400 mt-4 max-w-2xl">
+        Welcome to my digital fortress. Explore my cybersecurity writeups, CTF challenges, 
+        and technical documentation. Navigate through the void using the sidebar.
+      </p>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+      <!-- Card 1: Let's Defend -->
+      <div class="cyber-card group">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">🛡️</div>
+          <h2 class="text-2xl font-mono font-bold text-neon-cyan group-hover:text-glow transition-all">
+            Let's Defend
+          </h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Security Operations Center (SOC) challenges and investigations. Real-world scenarios 
+          covering threat detection, incident response, and security analysis.
+        </p>
+        <div class="flex gap-2 flex-wrap">
+          <span class="px-3 py-1 text-xs font-mono bg-neon-cyan/20 text-neon-cyan rounded-full border border-neon-cyan/40">
+            Blue Team
+          </span>
+          <span class="px-3 py-1 text-xs font-mono bg-electric-purple/20 text-electric-purple rounded-full border border-electric-purple/40">
+            SOC
+          </span>
+          <span class="px-3 py-1 text-xs font-mono bg-neon-pink/20 text-neon-pink rounded-full border border-neon-pink/40">
+            Investigation
+          </span>
+        </div>
+      </div>
+
+      <!-- Card 2: Coming Soon -->
+      <div class="cyber-card opacity-60">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">⚡</div>
+          <h2 class="text-2xl font-mono font-bold text-electric-purple">
+            More Challenges
+          </h2>
+        </div>
+        <p class="text-gray-300 mb-4">
+          Additional CTF writeups, penetration testing reports, and security research 
+          coming soon to this terminal.
+        </p>
+        <div class="flex gap-2 flex-wrap">
+          <span class="px-3 py-1 text-xs font-mono bg-gray-700/40 text-gray-400 rounded-full border border-gray-600">
+            Coming Soon
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="cyber-card mb-8">
+      <h2 class="text-3xl font-mono font-bold text-neon-pink mb-6 flex items-center gap-2">
+        <span class="text-neon-cyan">{'>'}</span> About This Site
+      </h2>
+      <div class="space-y-4 text-gray-300">
+        <p>
+          This portfolio is built with <span class="text-neon-cyan font-mono">Astro</span> and 
+          <span class="text-neon-pink font-mono">Tailwind CSS</span>, featuring a custom 
+          cyberpunk/retrofuturism design system.
+        </p>
+        <p>
+          The site automatically generates navigation from my Markdown files, making it easy 
+          to organize and share technical writeups and security research.
+        </p>
+        <div class="mt-6 pt-6 border-t border-neon-cyan/20">
+          <p class="text-sm font-mono text-gray-500">
+            <span class="text-neon-pink">{'>'}</span> Built with: Astro | Tailwind CSS | TypeScript
+          </p>
+          <p class="text-sm font-mono text-gray-500 mt-2">
+            <span class="text-neon-cyan">{'>'}</span> Deployed on: GitHub Pages
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="text-center py-12">
+      <p class="text-gray-400 font-mono mb-4">Ready to dive in?</p>
+      <div class="inline-flex gap-4">
+        <a href="/Lets-Defend" class="neon-button">
+          Browse Writeups
+        </a>
+      </div>
+    </div>
+  </div>
+</MainLayout>
+
+<style>
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .cyber-card:hover {
+    animation: float 3s ease-in-out infinite;
+  }
+</style>

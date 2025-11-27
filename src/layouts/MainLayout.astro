@@ -1,0 +1,19 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import RecursiveSidebar from '../components/RecursiveSidebar.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <RecursiveSidebar />
+  
+  <main class="flex-1 p-8 overflow-y-auto">
+    <slot />
+  </main>
+</BaseLayout>

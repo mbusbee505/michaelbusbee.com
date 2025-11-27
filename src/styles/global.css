@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+@layer base {
+  * {
+    @apply border-neon-cyan/20;
+  }
+
+  body {
+    @apply bg-cyber-dark text-gray-100 font-sans;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* CRT Scanline Effect */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      transparent 50%,
+      rgba(0, 255, 255, 0.03) 51%
+    );
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 9999;
+    animation: scanline 8s linear infinite;
+  }
+
+  /* Grid Background Effect */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-mono;
+  }
+
+  code {
+    @apply font-mono bg-cyber-darker px-2 py-1 rounded text-neon-cyan;
+  }
+
+  pre {
+    @apply bg-cyber-darker p-4 rounded-lg overflow-x-auto border border-neon-cyan/30;
+  }
+
+  pre code {
+    @apply bg-transparent p-0;
+  }
+}
+
+@layer components {
+  /* Glowing Border Utility */
+  .glow-border {
+    @apply border-2 border-neon-cyan shadow-neon-cyan;
+  }
+
+  .glow-border-pink {
+    @apply border-2 border-neon-pink shadow-neon-pink;
+  }
+
+  .glow-border-purple {
+    @apply border-2 border-electric-purple shadow-neon-purple;
+  }
+
+  /* Glitch Text Effect */
+  .glitch {
+    position: relative;
+    display: inline-block;
+  }
+
+  .glitch:hover {
+    animation: glitch 0.3s linear 2;
+  }
+
+  .glitch:hover::before,
+  .glitch:hover::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glitch:hover::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00ff;
+    clip: rect(24px, 550px, 90px, 0);
+    animation: glitch-anim 3s infinite linear alternate-reverse;
+  }
+
+  .glitch:hover::after {
+    left: -2px;
+    text-shadow: -2px 0 #00ffff;
+    clip: rect(85px, 550px, 140px, 0);
+    animation: glitch-anim 2s infinite linear alternate-reverse;
+  }
+
+  /* Card with Cyberpunk Styling */
+  .cyber-card {
+    @apply bg-cyber-darker/80 backdrop-blur-sm rounded-lg p-6 border border-neon-cyan/30 
+           hover:border-neon-cyan/60 transition-all duration-300 hover:shadow-neon-cyan/50;
+  }
+
+  /* Neon Button */
+  .neon-button {
+    @apply px-6 py-3 border-2 border-neon-pink bg-transparent text-neon-pink font-mono
+           hover:bg-neon-pink hover:text-cyber-dark transition-all duration-300
+           hover:shadow-neon-pink uppercase tracking-wider;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+
+  .text-glow-strong {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor, 0 0 40px currentColor;
+  }
+}
+
+/* Additional glitch animation */
+@keyframes glitch-anim {
+  0% {
+    clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+  }
+  5% {
+    clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+  }
+  10% {
+    clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+  }
+  15% {
+    clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+  }
+  20% {
+    clip: rect(random(100) + px, 9999px, random(100) + px, 0);
+  }
+  100% {
+    clip: rect(0, 9999px, 9999px, 0);
+  }
+}

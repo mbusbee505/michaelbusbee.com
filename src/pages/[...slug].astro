@@ -1,0 +1,257 @@
+---
+import { readdir, readFile, stat } from 'node:fs/promises';
+import { join, dirname, relative, sep } from 'node:path';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeStringify from 'rehype-stringify';
+import rehypeSlug from 'rehype-slug';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import MainLayout from '../layouts/MainLayout.astro';
+
+interface MarkdownFile {
+  slug: string;
+  filePath: string;
+  content: string;
+  title: string;
+}
+
+async function getAllMarkdownFiles(dir: string, baseDir: string): Promise<MarkdownFile[]> {
+  const files: MarkdownFile[] = [];
+  
+  try {
+    const entries = await readdir(dir);
+    
+    for (const entry of entries) {
+      const fullPath = join(dir, entry);
+      const stats = await stat(fullPath);
+      
+      if (stats.isDirectory() && entry !== 'Attachments') {
+        const subFiles = await getAllMarkdownFiles(fullPath, baseDir);
+        files.push(...subFiles);
+      } else if (entry.endsWith('.md')) {
+        const content = await readFile(fullPath, 'utf-8');
+        const relativePath = relative(baseDir, fullPath);
+        const slug = relativePath.replace(/\.md$/, '').split(sep).join('/');
+        
+        // Extract title from first h1 or use filename
+        const titleMatch = content.match(/^#\s+(.+)$/m);
+        const title = titleMatch ? titleMatch[1] : entry.replace(/\.md$/, '');
+        
+        files.push({
+          slug,
+          filePath: fullPath,
+          content,
+          title,
+        });
+      }
+    }
+  } catch (error) {
+    console.error(`Error reading directory ${dir}:`, error);
+  }
+  
+  return files;
+}
+
+export async function getStaticPaths() {
+  const contentDir = join(process.cwd(), 'src', 'Lets-Defend');
+  
+  try {
+    const markdownFiles = await getAllMarkdownFiles(contentDir, contentDir);
+    
+    return markdownFiles.map((file) => ({
+      params: { slug: file.slug },
+      props: { file },
+    }));
+  } catch (error) {
+    console.error('Error in getStaticPaths:', error);
+    return [];
+  }
+}
+
+const { file } = Astro.props;
+
+// Process markdown with image path handling
+async function processMarkdown(content: string, filePath: string): Promise<string> {
+  const fileDir = dirname(filePath);
+  const contentDir = join(process.cwd(), 'src', 'Lets-Defend');
+  
+  // Replace relative image paths with proper URLs
+  let processedContent = content.replace(
+    /!\[([^\]]*)\]\(\.\/Attachments\/([^)]+)\)/g,
+    (match, alt, imagePath) => {
+      // Get the relative path from Lets-Defend to the image
+      const relativeImagePath = relative(
+        contentDir,
+        join(fileDir, 'Attachments', imagePath)
+      );
+      // Convert to URL path
+      const urlPath = '/Lets-Defend/' + relativeImagePath.split(sep).join('/');
+      return `![${alt}](${urlPath})`;
+    }
+  );
+  
+  // Also handle images without ./Attachments prefix
+  processedContent = processedContent.replace(
+    /!\[([^\]]*)\]\((?!http|\/|\.\.\/|\.\/Attachments\/)([^)]+)\)/g,
+    (match, alt, imagePath) => {
+      const relativeImagePath = relative(
+        contentDir,
+        join(fileDir, imagePath)
+      );
+      const urlPath = '/Lets-Defend/' + relativeImagePath.split(sep).join('/');
+      return `![${alt}](${urlPath})`;
+    }
+  );
+  
+  const result = await unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeSlug)
+    .use(rehypeAutolinkHeadings, { behavior: 'wrap' })
+    .use(rehypeStringify)
+    .process(processedContent);
+  
+  return String(result);
+}
+
+const htmlContent = await processMarkdown(file.content, file.filePath);
+---
+
+<MainLayout title={file.title}>
+  <article class="max-w-4xl mx-auto">
+    <!-- Article Header -->
+    <header class="mb-12">
+      <div class="flex items-center gap-2 text-sm font-mono text-gray-500 mb-4">
+        <span class="text-neon-pink">{'>'}</span>
+        <span class="text-neon-cyan">/{file.slug.split('/').join(' / ')}</span>
+      </div>
+      
+      <h1 class="text-5xl md:text-6xl font-mono font-bold text-neon-cyan mb-4 glitch text-glow" data-text={file.title}>
+        {file.title}
+      </h1>
+      
+      <div class="h-1 w-24 bg-gradient-to-r from-neon-pink to-electric-purple"></div>
+    </header>
+
+    <!-- Article Content -->
+    <div class="prose prose-invert prose-lg max-w-none cyber-card">
+      <div class="markdown-content" set:html={htmlContent} />
+    </div>
+
+    <!-- Article Footer -->
+    <footer class="mt-12 pt-8 border-t border-neon-cyan/20">
+      <div class="flex items-center justify-between text-sm font-mono text-gray-500">
+        <span>
+          <span class="text-neon-pink">{'>'}</span> End of document
+        </span>
+        <a href="/" class="text-neon-cyan hover:text-neon-pink transition-colors hover:text-glow">
+          ← Back to home
+        </a>
+      </div>
+    </footer>
+  </article>
+</MainLayout>
+
+<style is:global>
+  /* Markdown Content Styling */
+  .markdown-content {
+    @apply text-gray-200;
+  }
+
+  .markdown-content h1,
+  .markdown-content h2,
+  .markdown-content h3,
+  .markdown-content h4,
+  .markdown-content h5,
+  .markdown-content h6 {
+    @apply font-mono font-bold mt-8 mb-4;
+  }
+
+  .markdown-content h1 {
+    @apply text-4xl text-neon-cyan border-b border-neon-cyan/30 pb-2;
+  }
+
+  .markdown-content h2 {
+    @apply text-3xl text-neon-pink;
+  }
+
+  .markdown-content h3 {
+    @apply text-2xl text-electric-purple;
+  }
+
+  .markdown-content h4 {
+    @apply text-xl text-neon-cyan;
+  }
+
+  .markdown-content p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .markdown-content a {
+    @apply text-neon-cyan hover:text-neon-pink underline transition-colors;
+  }
+
+  .markdown-content ul,
+  .markdown-content ol {
+    @apply my-4 ml-6 space-y-2;
+  }
+
+  .markdown-content li {
+    @apply text-gray-300;
+  }
+
+  .markdown-content ul li {
+    @apply list-disc;
+  }
+
+  .markdown-content ol li {
+    @apply list-decimal;
+  }
+
+  .markdown-content blockquote {
+    @apply border-l-4 border-neon-pink pl-4 italic text-gray-400 my-4;
+  }
+
+  .markdown-content img {
+    @apply rounded-lg border-2 border-neon-cyan/30 my-6 max-w-full h-auto;
+    @apply hover:border-neon-cyan/60 transition-all duration-300;
+  }
+
+  .markdown-content pre {
+    @apply my-6 overflow-x-auto;
+  }
+
+  .markdown-content code {
+    @apply text-sm;
+  }
+
+  .markdown-content table {
+    @apply w-full my-6 border-collapse;
+  }
+
+  .markdown-content th,
+  .markdown-content td {
+    @apply border border-neon-cyan/30 px-4 py-2;
+  }
+
+  .markdown-content th {
+    @apply bg-neon-cyan/10 text-neon-cyan font-mono font-bold;
+  }
+
+  .markdown-content td {
+    @apply bg-cyber-darker/50;
+  }
+
+  .markdown-content hr {
+    @apply my-8 border-t border-neon-cyan/30;
+  }
+
+  .markdown-content strong {
+    @apply text-neon-pink font-bold;
+  }
+
+  .markdown-content em {
+    @apply text-electric-purple italic;
+  }
+</style>

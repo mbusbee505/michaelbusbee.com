@@ -1,0 +1,235 @@
+---
+import { readdir, stat } from 'node:fs/promises';
+import { join } from 'node:path';
+
+interface FileTreeItem {
+  name: string;
+  path: string;
+  isDirectory: boolean;
+  children?: FileTreeItem[];
+}
+
+async function buildFileTree(dirPath: string, basePath: string = ''): Promise<FileTreeItem[]> {
+  try {
+    const entries = await readdir(dirPath);
+    const items: FileTreeItem[] = [];
+
+    for (const entry of entries) {
+      // Skip hidden files and Attachments folders in the tree
+      if (entry.startsWith('.') || entry === 'Attachments') {
+        continue;
+      }
+
+      const fullPath = join(dirPath, entry);
+      const stats = await stat(fullPath);
+      const relativePath = basePath ? `${basePath}/${entry}` : entry;
+
+      if (stats.isDirectory()) {
+        const children = await buildFileTree(fullPath, relativePath);
+        items.push({
+          name: entry,
+          path: relativePath,
+          isDirectory: true,
+          children: children.length > 0 ? children : undefined,
+        });
+      } else if (entry.endsWith('.md')) {
+        // Create URL-friendly path: Lets-Defend/Easy/Challenge1/Challenge-1.md -> /Lets-Defend/Easy/Challenge1/Challenge-1
+        const urlPath = '/' + relativePath.replace(/\.md$/, '');
+        items.push({
+          name: entry.replace(/\.md$/, ''),
+          path: urlPath,
+          isDirectory: false,
+        });
+      }
+    }
+
+    // Sort: directories first, then files; alphabetically within each group
+    return items.sort((a, b) => {
+      if (a.isDirectory && !b.isDirectory) return -1;
+      if (!a.isDirectory && b.isDirectory) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  } catch (error) {
+    console.error(`Error reading directory ${dirPath}:`, error);
+    return [];
+  }
+}
+
+const contentDir = join(process.cwd(), 'src', 'Lets-Defend');
+let fileTree: FileTreeItem[] = [];
+
+try {
+  fileTree = await buildFileTree(contentDir);
+} catch (error) {
+  console.error('Error building file tree:', error);
+}
+
+const currentPath = Astro.url.pathname;
+---
+
+<aside class="w-80 min-h-screen bg-cyber-darker/60 backdrop-blur-md border-r-2 border-neon-cyan/30 p-6 overflow-y-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <a href="/" class="block group">
+      <h1 class="text-2xl font-mono font-bold text-neon-cyan glitch hover:text-glow-strong transition-all duration-300" data-text="MICHAELBUSBEE">
+        MICHAELBUSBEE
+      </h1>
+      <p class="text-sm text-gray-400 mt-1 group-hover:text-neon-pink transition-colors">.COM</p>
+    </a>
+  </div>
+
+  <!-- Navigation Tree -->
+  <nav class="space-y-2">
+    <div class="mb-4">
+      <div class="text-xs font-mono text-neon-cyan/60 uppercase tracking-wider mb-2 flex items-center">
+        <span class="text-neon-pink mr-2">{'>'}</span> Navigation
+      </div>
+    </div>
+    
+    <div id="file-tree" class="space-y-1">
+      {fileTree.map((item) => (
+        <div class="tree-item" data-path={item.path}>
+          {item.isDirectory ? (
+            <div>
+              <button 
+                class="folder-toggle w-full text-left px-3 py-2 rounded font-mono text-sm hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-200 flex items-center gap-2"
+                data-folder={item.path}
+              >
+                <span class="chevron text-neon-pink transition-transform duration-200">▶</span>
+                <span class="text-electric-purple">📁</span>
+                <span>{item.name}</span>
+              </button>
+              {item.children && (
+                <div class="folder-content ml-4 mt-1 space-y-1 hidden">
+                  {item.children.map((child) => (
+                    child.isDirectory ? (
+                      <div class="tree-item" data-path={child.path}>
+                        <button 
+                          class="folder-toggle w-full text-left px-3 py-2 rounded font-mono text-sm hover:bg-neon-cyan/10 hover:text-neon-cyan transition-all duration-200 flex items-center gap-2"
+                          data-folder={child.path}
+                        >
+                          <span class="chevron text-neon-pink transition-transform duration-200">▶</span>
+                          <span class="text-electric-purple">📁</span>
+                          <span>{child.name}</span>
+                        </button>
+                        {child.children && (
+                          <div class="folder-content ml-4 mt-1 space-y-1 hidden">
+                            {child.children.map((file) => (
+                              <a
+                                href={file.path}
+                                class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
+                                  currentPath === file.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
+                                }`}
+                              >
+                                <span class="text-neon-green">📄</span>
+                                <span>{file.name}</span>
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <a
+                        href={child.path}
+                        class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
+                          currentPath === child.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
+                        }`}
+                      >
+                        <span class="text-neon-green">📄</span>
+                        <span>{child.name}</span>
+                      </a>
+                    )
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <a
+              href={item.path}
+              class={`block px-3 py-2 rounded font-mono text-sm hover:bg-neon-pink/10 hover:text-neon-pink transition-all duration-200 flex items-center gap-2 ${
+                currentPath === item.path ? 'bg-neon-cyan/20 text-neon-cyan border-l-2 border-neon-cyan' : 'text-gray-300'
+              }`}
+            >
+              <span class="text-neon-green">📄</span>
+              <span>{item.name}</span>
+            </a>
+          )}
+        </div>
+      ))}
+    </div>
+  </nav>
+
+  <!-- Footer -->
+  <div class="mt-12 pt-6 border-t border-neon-cyan/20">
+    <p class="text-xs font-mono text-gray-500">
+      <span class="text-neon-pink">{'>'}</span> SYSTEM ONLINE
+    </p>
+  </div>
+</aside>
+
+<script>
+  // Toggle folder expand/collapse
+  document.addEventListener('DOMContentLoaded', () => {
+    const folderToggles = document.querySelectorAll('.folder-toggle');
+    
+    folderToggles.forEach((toggle) => {
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        const button = e.currentTarget as HTMLElement;
+        const parent = button.parentElement;
+        const content = parent?.querySelector('.folder-content');
+        const chevron = button.querySelector('.chevron');
+        
+        if (content && chevron) {
+          content.classList.toggle('hidden');
+          chevron.classList.toggle('rotate-90');
+        }
+      });
+    });
+
+    // Auto-expand active path
+    const activePath = window.location.pathname;
+    const activeLink = document.querySelector(`a[href="${activePath}"]`);
+    
+    if (activeLink) {
+      let parent = activeLink.closest('.folder-content');
+      while (parent) {
+        parent.classList.remove('hidden');
+        const toggle = parent.parentElement?.querySelector('.folder-toggle .chevron');
+        if (toggle) {
+          toggle.classList.add('rotate-90');
+        }
+        parent = parent.parentElement?.closest('.folder-content');
+      }
+    }
+  });
+</script>
+
+<style>
+  .chevron {
+    display: inline-block;
+    transition: transform 0.2s ease;
+  }
+  
+  .rotate-90 {
+    transform: rotate(90deg);
+  }
+
+  /* Custom scrollbar */
+  aside::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  aside::-webkit-scrollbar-track {
+    background: rgba(10, 10, 18, 0.5);
+  }
+
+  aside::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 255, 0.3);
+    border-radius: 4px;
+  }
+
+  aside::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 255, 0.5);
+  }
+</style>
