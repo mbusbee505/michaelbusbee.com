@@ -192,14 +192,14 @@ const currentPath = Astro.url.pathname;
     const activeLink = document.querySelector(`a[href="${activePath}"]`);
     
     if (activeLink) {
-      let parent = activeLink.closest('.folder-content');
+      let parent = activeLink.closest('.folder-content') as HTMLElement | null;
       while (parent) {
         parent.classList.remove('hidden');
-        const toggle = parent.parentElement?.querySelector('.folder-toggle .chevron');
+        const toggle = parent.parentElement?.querySelector('.folder-toggle .chevron') as HTMLElement | null;
         if (toggle) {
           toggle.classList.add('rotate-90');
         }
-        parent = parent.parentElement?.closest('.folder-content');
+        parent = parent.parentElement?.closest('.folder-content') as HTMLElement | null;
       }
     }
   });
